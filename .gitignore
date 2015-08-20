@@ -1,0 +1,7 @@
+build/
+dist/
+deb_dist/
+venv/
+env/
+*.pyc
+*.egg-info
