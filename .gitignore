@@ -5,3 +5,4 @@ venv/
 env/
 *.pyc
 *.egg-info
+.tox/

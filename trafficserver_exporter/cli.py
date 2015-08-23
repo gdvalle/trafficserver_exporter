@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 
-import time
 import argparse
 import logging
-from prometheus_client import start_http_server, REGISTRY
+from prometheus_client import REGISTRY
 from .collector import TrafficServerCollector
+from .http import start_http_server
 
 
 ARGS = argparse.ArgumentParser(
@@ -13,6 +13,8 @@ ARGS = argparse.ArgumentParser(
 ARGS.add_argument(
     '--endpoint', dest='endpoint', default='http://127.0.0.1/_stats',
     help="Traffic Server's stats_over_http plugin URL")
+ARGS.add_argument(
+    '--addr', dest='addr', default='', help='Address to bind and listen on')
 ARGS.add_argument(
     '--port', dest='port', default=9122, help='Port to bind and listen on')
 ARGS.add_argument(
@@ -37,14 +39,13 @@ def main():
         logging.basicConfig(level=logging.WARNING)
 
     log.debug('Starting HTTP server')
-    start_http_server(args.port)
+    httpd_thread = start_http_server(args.port, addr=args.addr)
     log.debug('Registering collector')
     REGISTRY.register(TrafficServerCollector(args.endpoint))
     log.info('Listening on :{port}'.format(port=args.port))
 
-    # Until we can join the httpd thread...
-    while True:
-        time.sleep(9999999)
+    # Wait for the webserver
+    httpd_thread.join()
 
 
 if __name__ == '__main__':

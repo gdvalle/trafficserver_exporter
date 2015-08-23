@@ -8,7 +8,7 @@ An Apache Traffic Server metrics exporter for Prometheus.  Uses the stats_over_h
 virtualenv venv
 . venv/bin/activate
 pip install -e .
-trafficserver_exporter --endpoint=http://trafficserver/_stats
+python -m trafficserver_exporter.cli --endpoint=http://trafficserver/_stats
 ```
 
 
