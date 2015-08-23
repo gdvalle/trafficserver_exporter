@@ -3,6 +3,8 @@
 import logging
 import json
 import requests
+import re
+
 from prometheus_client import Metric
 
 
@@ -16,10 +18,13 @@ TS_RESPONSE_CODES = ('100', '101', '1xx', '200', '201', '202', '203', '204',
                      '413', '414', '415', '416', '4xx', '500', '501', '502',
                      '503', '504', '505', '5xx')
 
+CACHE_VOLUMES = re.compile('^proxy.process.cache.volume_([0-9]+)')
+
 log = logging.getLogger(__name__)
 
 
-class TrafficServerCollector(object):
+class StatsPluginCollector(object):
+    """Collector for metrics from the stats_over_http plugin."""
     def __init__(self, endpoint):
         self._endpoint = endpoint
         self.log = log
@@ -251,17 +256,17 @@ class TrafficServerCollector(object):
                     'protocol': 'http'})
         # Zero labels (misses)
         metric.add_sample(
-            'trafficserver_transaction_misses_total',
+            'trafficserver_transaction_hits_total',
             value='0',
             labels={'state': 'cold',
                     'protocol': 'http'})
         metric.add_sample(
-            'trafficserver_transaction_misses_total',
+            'trafficserver_transaction_hits_total',
             value='0',
             labels={'state': 'not_cacheable',
                     'protocol': 'http'})
         metric.add_sample(
-            'trafficserver_transaction_misses_total',
+            'trafficserver_transaction_hits_total',
             value='0',
             labels={'state': 'changed',
                     'protocol': 'http'})
@@ -290,14 +295,14 @@ class TrafficServerCollector(object):
                         'miss_changed')],
             labels={'state': 'changed',
                     'protocol': 'http'})
-        # Zero labels
+        # Zero labels (hits)
         metric.add_sample(
-            'trafficserver_transaction_hits_total',
+            'trafficserver_transaction_misses_total',
             value='0',
             labels={'state': 'fresh',
                     'protocol': 'http'})
         metric.add_sample(
-            'trafficserver_transaction_hits_total',
+            'trafficserver_transaction_misses_total',
             value='0',
             labels={'state': 'revalidated',
                     'protocol': 'http'})
@@ -444,7 +449,16 @@ class TrafficServerCollector(object):
         #
         # Cache
         #
-        # RAM Cache hits
+        volumes = set()
+        for key in data:
+            if key.startswith('proxy.process.cache.volume_'):
+                m = CACHE_VOLUMES.match(key)
+                volumes.add(int(m.group(1)))
+
+        for volume in volumes:
+            for metric in self._parse_volume_metrics(data, volume):
+                yield metric
+
         metric = Metric(
             'trafficserver_ram_cache_hits_total',
             'RAM cache hit count.',
@@ -452,10 +466,9 @@ class TrafficServerCollector(object):
         metric.add_sample(
             'trafficserver_ram_cache_hits_total',
             value=data['proxy.process.cache.ram_cache.hits'],
-            labels={})
+            labels={'volume': str(volume)})
         yield metric
 
-        # RAM Cache hits
         metric = Metric(
             'trafficserver_ram_cache_misses_total',
             'RAM cache miss count.',
@@ -466,46 +479,62 @@ class TrafficServerCollector(object):
             labels={})
         yield metric
 
-        # Cache avail
         metric = Metric(
-            'trafficserver_cache_avail_size_bytes',
-            'Total cache available.',
-            'gauge')
-        metric.add_sample(
-            'trafficserver_cache_avail_size_bytes',
-            value=data['proxy.process.cache.bytes_total'],
-            labels={})
-        yield metric
-
-        # Cache used
-        metric = Metric(
-            'trafficserver_cache_used_bytes',
-            'Total cache used in bytes.',
-            'gauge')
-        metric.add_sample(
-            'trafficserver_cache_used_bytes',
-            value=data['proxy.process.cache.bytes_used'],
-            labels={})
-        yield metric
-
-        # RAM Cache avail
-        metric = Metric(
-            'trafficserver_ram_cache_avail_size_bytes',
+            'trafficserver_ram_cache_avail_size_bytes_total',
             'RAM cache available in bytes.',
             'gauge')
         metric.add_sample(
-            'trafficserver_ram_cache_avail_size_bytes',
+            'trafficserver_ram_cache_avail_size_bytes_total',
             value=data['proxy.process.cache.ram_cache.total_bytes'],
             labels={})
         yield metric
 
-        # RAM Cache used
         metric = Metric(
-            'trafficserver_ram_cache_used_bytes',
+            'trafficserver_ram_cache_used_bytes_total',
             'RAM cache used in bytes.',
             'gauge')
         metric.add_sample(
-            'trafficserver_ram_cache_used',
+            'trafficserver_ram_cache_used_bytes_total',
             value=data['proxy.process.cache.ram_cache.bytes_used'],
             labels={})
         yield metric
+
+    def _parse_volume_metrics(self, data, volume):
+        metric = Metric(
+            'trafficserver_cache_avail_size_bytes_total',
+            'Total cache available.',
+            'gauge')
+        metric.add_sample(
+            'trafficserver_cache_avail_size_bytes_total',
+            value=data[('proxy.process.cache.volume_{0}.'
+                        'bytes_used').format(volume)],
+            labels={'volume': str(volume)})
+        yield metric
+
+        metric = Metric(
+            'trafficserver_cache_used_bytes_total',
+            'Total cache used in bytes.',
+            'gauge')
+        metric.add_sample(
+            'trafficserver_cache_used_bytes_total',
+            value=data[('proxy.process.cache.volume_{0}.'
+                        'bytes_total').format(volume)],
+            labels={'volume': str(volume)})
+        yield metric
+
+        for action in ('lookup', 'read', 'write', 'update', 'remove',
+                       'evacuate', 'scan', 'read_busy'):
+            for result in ('success', 'failure'):
+                yield self._make_volume_metric(data, volume, action, result)
+
+    def _make_volume_metric(self, data, volume, action, result):
+        key = 'proxy.process.cache.volume_{volume}.{action}.{result}'.format(
+            volume=volume, action=action, result=result)
+        label = 'trafficserver_cache_{action}_{result}_total'.format(
+            action=action, result=result)
+        label_help = 'Cache {action} {result} count.'.format(
+            action=action, result=result)
+        metric = Metric(label, label_help, 'counter')
+        metric.add_sample(label, value=data[key],
+                          labels={'volume': str(volume)})
+        return metric

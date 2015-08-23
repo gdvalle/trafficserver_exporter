@@ -3,7 +3,7 @@
 import argparse
 import logging
 from prometheus_client import REGISTRY
-from .collector import TrafficServerCollector
+from .collector import StatsPluginCollector
 from .http import start_http_server
 
 
@@ -41,7 +41,7 @@ def main():
     log.debug('Starting HTTP server')
     httpd_thread = start_http_server(args.port, addr=args.addr)
     log.debug('Registering collector')
-    REGISTRY.register(TrafficServerCollector(args.endpoint))
+    REGISTRY.register(StatsPluginCollector(args.endpoint))
     log.info('Listening on :{port}'.format(port=args.port))
 
     # Wait for the webserver
