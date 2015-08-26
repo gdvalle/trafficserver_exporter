@@ -2,9 +2,9 @@
 
 import logging
 import json
-import requests
 import re
 
+import requests
 from prometheus_client import Metric
 
 
@@ -20,14 +20,14 @@ TS_RESPONSE_CODES = ('100', '101', '1xx', '200', '201', '202', '203', '204',
 
 CACHE_VOLUMES = re.compile('^proxy.process.cache.volume_([0-9]+)')
 
-log = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 
 class StatsPluginCollector(object):
     """Collector for metrics from the stats_over_http plugin."""
     def __init__(self, endpoint):
         self._endpoint = endpoint
-        self.log = log
+        self.log = LOG
 
     def get_json(self):
         return json.loads(
@@ -449,12 +449,14 @@ class StatsPluginCollector(object):
         #
         # Cache
         #
+        # Gather all cache volumes for cache statistics
         volumes = set()
         for key in data:
             if key.startswith('proxy.process.cache.volume_'):
                 m = CACHE_VOLUMES.match(key)
                 volumes.add(int(m.group(1)))
 
+        # Create all cache volume metrics
         for volume in volumes:
             for metric in self._parse_volume_metrics(data, volume):
                 yield metric
@@ -522,19 +524,19 @@ class StatsPluginCollector(object):
             labels={'volume': str(volume)})
         yield metric
 
-        for action in ('lookup', 'read', 'write', 'update', 'remove',
-                       'evacuate', 'scan', 'read_busy'):
+        metric = Metric(
+            'trafficserver_cache_operations_total',
+            'Cache operation count.',
+            'counter')
+        for op in ('lookup', 'read', 'write', 'update', 'remove',
+                   'evacuate', 'scan', 'read_busy'):
             for result in ('success', 'failure'):
-                yield self._make_volume_metric(data, volume, action, result)
-
-    def _make_volume_metric(self, data, volume, action, result):
-        key = 'proxy.process.cache.volume_{volume}.{action}.{result}'.format(
-            volume=volume, action=action, result=result)
-        label = 'trafficserver_cache_{action}_{result}_total'.format(
-            action=action, result=result)
-        label_help = 'Cache {action} {result} count.'.format(
-            action=action, result=result)
-        metric = Metric(label, label_help, 'counter')
-        metric.add_sample(label, value=data[key],
-                          labels={'volume': str(volume)})
-        return metric
+                k = 'proxy.process.cache.volume_{volume}.{op}.{result}'.format(
+                    volume=volume, op=op, result=result)
+                metric.add_sample(
+                    'trafficserver_cache_operations_total',
+                    value=data[k],
+                    labels={'volume': str(volume),
+                            'operation': op,
+                            'result': result})
+        yield metric

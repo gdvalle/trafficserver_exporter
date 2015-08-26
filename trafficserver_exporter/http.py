@@ -4,6 +4,7 @@ try:
 except ImportError:
     # Py2
     from BaseHTTPServer import HTTPServer
+
 from prometheus_client.exposition import MetricsHandler
 
 

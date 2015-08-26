@@ -1,8 +1,8 @@
-#!/usr/bin/env python
-
 import argparse
 import logging
-from prometheus_client import REGISTRY
+
+from prometheus_client import REGISTRY, ProcessCollector
+
 from .collector import StatsPluginCollector
 from .http import start_http_server
 
@@ -18,10 +18,26 @@ ARGS.add_argument(
 ARGS.add_argument(
     '--port', dest='port', default=9122, help='Port to bind and listen on')
 ARGS.add_argument(
+    '--pidfile', dest='pidfile', default='/var/run/trafficserver/server.lock',
+    help='Path to trafficserver PID file; used with --procstats')
+ARGS.add_argument(
+    '--no-procstats', dest='no_procstats', default=False, action='store_true',
+    help='Disable process metric collection')
+ARGS.add_argument(
     '-v', '--verbose', action='count', dest='level',
     default=0, help='Verbose logging (repeat for more verbosity)')
 
-log = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
+
+
+def get_ts_pid(pidfile):
+    try:
+        with open(pidfile) as f:
+            pid = f.readline()
+    except EnvironmentError:
+        LOG.warning('Unable to read pidfile; process metrics will fail!')
+        pid = None
+    return pid
 
 
 def main():
@@ -38,15 +54,19 @@ def main():
     elif args.level == 0:
         logging.basicConfig(level=logging.WARNING)
 
-    log.debug('Starting HTTP server')
+    LOG.debug('Starting HTTP server')
     httpd_thread = start_http_server(args.port, addr=args.addr)
-    log.debug('Registering collector')
+
+    LOG.debug('Registering StatsPluginCollector')
     REGISTRY.register(StatsPluginCollector(args.endpoint))
-    log.info('Listening on :{port}'.format(port=args.port))
+
+    if not args.no_procstats:
+        LOG.debug('Registering ProcessCollector')
+        REGISTRY.register(ProcessCollector(
+            pid=lambda: get_ts_pid(args.pidfile),
+            namespace='trafficserver'))
+
+    LOG.info('Listening on :{port}'.format(port=args.port))
 
     # Wait for the webserver
     httpd_thread.join()
-
-
-if __name__ == '__main__':
-    main()

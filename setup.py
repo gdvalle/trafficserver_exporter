@@ -17,7 +17,7 @@ setup(
     long_description=__doc__,
     entry_points={
         'console_scripts': [
-            'trafficserver_exporter=trafficserver_exporter.cli:main'
+            'trafficserver_exporter=trafficserver_exporter.__main__:main'
         ],
     },
     install_requires=[
