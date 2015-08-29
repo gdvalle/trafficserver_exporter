@@ -15,6 +15,10 @@ setup(
     author='Greg Dallavalle',
     description='Traffic Server metrics exporter for Prometheus',
     long_description=__doc__,
+    license='Apache Software License 2.0',
+    keywords='prometheus monitoring trafficserver',
+    test_suite='tests',
+    packages=['trafficserver_exporter'],
     entry_points={
         'console_scripts': [
             'trafficserver_exporter=trafficserver_exporter.__main__:main'
@@ -24,8 +28,6 @@ setup(
         'prometheus_client>=0.0.11',
         'requests>=2.0.0'
     ],
-    keywords='prometheus monitoring trafficserver',
-    packages=['trafficserver_exporter'],
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Programming Language :: Python :: 2',
@@ -41,5 +43,4 @@ setup(
         'Topic :: System :: Networking :: Monitoring',
         'License :: OSI Approved :: Apache Software License',
     ],
-    license='Apache Software License 2.0',
 )

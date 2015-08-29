@@ -6,3 +6,4 @@ env/
 *.pyc
 *.egg-info
 .tox/
+.eggs/
