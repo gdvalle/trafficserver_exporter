@@ -3,6 +3,7 @@
 import logging
 import json
 import re
+import time
 
 import requests
 from prometheus_client import Metric
@@ -34,6 +35,7 @@ class StatsPluginCollector(object):
             requests.get(self._endpoint).content.decode('UTF-8'))['global']
 
     def collect(self):
+        start_time = time.time()
         self.log.debug('Beginning collection')
 
         self.log.debug('Fetching JSON: {0}'.format(self._endpoint))
@@ -44,8 +46,21 @@ class StatsPluginCollector(object):
             yield metric
 
         self.log.debug('Collection complete')
+        yield self._get_scrape_duration_metric(start_time)
+
+    def _get_scrape_duration_metric(self, start_time):
+        metric = Metric(
+            'trafficserver_scrape_duration_seconds',
+            'Time the Traffic Server scrape took, in seconds.',
+            'gauge')
+        metric.add_sample(
+            'trafficserver_scrape_duration_seconds',
+            value=time.time() - start_time,
+            labels={})
+        return metric
 
     def parse_metrics(self, data):
+        """Generator for trafficserver metrics."""
         # Counter for server restarts
         metric = Metric(
             'trafficserver_restart_count',
