@@ -24,6 +24,9 @@ ARGS.add_argument(
     '--no-procstats', dest='no_procstats', default=False, action='store_true',
     help='Disable process metric collection')
 ARGS.add_argument(
+    '--convert-to-floats', dest='convert_to_floats', default=False, action='store_true',
+    help='Convert numeric values, emitted as strings, to floats - needed for older versions of Traffic Server')
+ARGS.add_argument(
     '-v', '--verbose', action='count', dest='level',
     default=0, help='Verbose logging (repeat for more verbosity)')
 
@@ -58,7 +61,7 @@ def main():
     httpd_thread = start_http_server(args.port, addr=args.addr)
 
     LOG.debug('Registering StatsPluginCollector')
-    REGISTRY.register(StatsPluginCollector(args.endpoint))
+    REGISTRY.register(StatsPluginCollector(args.endpoint, args.convert_to_floats))
 
     if not args.no_procstats:
         LOG.debug('Registering ProcessCollector')

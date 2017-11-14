@@ -26,8 +26,9 @@ LOG = logging.getLogger(__name__)
 
 class StatsPluginCollector(object):
     """Collector for metrics from the stats_over_http plugin."""
-    def __init__(self, endpoint):
+    def __init__(self, endpoint, convert_to_floats):
         self._endpoint = endpoint
+        self.convert_to_floats = convert_to_floats
         self.log = LOG
 
     def get_json(self):
@@ -59,6 +60,14 @@ class StatsPluginCollector(object):
             labels={})
         return metric
 
+    def _getValue(self, data, key):
+        """Get value from json data, given a key. Convert to float optionally"""
+        value=data[key]
+        if self.convert_to_floats:
+            return float(value)
+        else:
+            return value
+
     def parse_metrics(self, data):
         """Generator for trafficserver metrics."""
         # Counter for server restarts
@@ -68,7 +77,7 @@ class StatsPluginCollector(object):
             'counter')
         metric.add_sample(
             'trafficserver_restart_count',
-            value=data['proxy.node.restarts.proxy.restart_count'],
+            value=self._getValue(data, 'proxy.node.restarts.proxy.restart_count'),
             labels={})
         yield metric
 
@@ -82,17 +91,17 @@ class StatsPluginCollector(object):
             'counter')
         metric.add_sample(
             'trafficserver_connections_total',
-            value=data['proxy.process.http.total_client_connections'],
+            value=self._getValue(data, 'proxy.process.http.total_client_connections'),
             labels={'source': 'client',
                     'protocol': 'http'})
         metric.add_sample(
             'trafficserver_connections_total',
-            value=data['proxy.process.http.total_server_connections'],
+            value=self._getValue(data, 'proxy.process.http.total_server_connections'),
             labels={'source': 'server',
                     'protocol': 'http'})
         metric.add_sample(
             'trafficserver_connections_total',
-            value=data['proxy.process.http.total_parent_proxy_connections'],
+            value=self._getValue(data, 'proxy.process.http.total_parent_proxy_connections'),
             labels={'source': 'parent_proxy',
                     'protocol': 'http'})
         yield metric
@@ -104,7 +113,7 @@ class StatsPluginCollector(object):
             'gauge')
         metric.add_sample(
             'trafficserver_requests_incoming',
-            value=data['proxy.process.http.incoming_requests'],
+            value=self._getValue(data, 'proxy.process.http.incoming_requests'),
             labels={'protocol': 'http'})
         yield metric
 
@@ -115,7 +124,7 @@ class StatsPluginCollector(object):
             'counter')
         metric.add_sample(
             'trafficserver_client_aborts_total',
-            value=data['proxy.process.http.err_client_abort_count_stat'],
+            value=self._getValue(data, 'proxy.process.http.err_client_abort_count_stat'),
             labels={'protocol': 'http'})
         yield metric
 
@@ -126,7 +135,7 @@ class StatsPluginCollector(object):
             'counter')
         metric.add_sample(
             'trafficserver_connect_failures_total',
-            value=data['proxy.process.http.err_connect_fail_count_stat'],
+            value=self._getValue(data, 'proxy.process.http.err_connect_fail_count_stat'),
             labels={'protocol': 'http'})
         yield metric
 
@@ -137,14 +146,14 @@ class StatsPluginCollector(object):
             'counter')
         metric.add_sample(
             'trafficserver_transactions_total',
-            value=data[('proxy.node.http.'
-                        'user_agents_total_transactions_count')],
+            value=self._getValue(data, ('proxy.node.http.'
+                        'user_agents_total_transactions_count')),
             labels={'source': 'user_agent',
                     'protocol': 'http'})
         metric.add_sample(
             'trafficserver_transactions_total',
-            value=data[('proxy.node.http.'
-                        'origin_server_total_transactions_count')],
+            value=self._getValue(data, ('proxy.node.http.'
+                        'origin_server_total_transactions_count')),
             labels={'source': 'origin_server',
                     'protocol': 'http'})
         yield metric
@@ -156,7 +165,7 @@ class StatsPluginCollector(object):
             'counter')
         metric.add_sample(
             'trafficserver_transactions_time_total',
-            value=data['proxy.process.http.total_transactions_time'],
+            value=self._getValue(data, 'proxy.process.http.total_transactions_time'),
             labels={})
         yield metric
 
@@ -167,13 +176,13 @@ class StatsPluginCollector(object):
             'counter')
         metric.add_sample(
             'trafficserver_hit_transaction_time_ms_total',
-            value=data['proxy.process.http.transaction_totaltime.hit_fresh'],
+            value=self._getValue(data, 'proxy.process.http.transaction_totaltime.hit_fresh'),
             labels={'state': 'fresh',
                     'protocol': 'http'})
         metric.add_sample(
             'trafficserver_hit_transaction_time_ms_total',
-            value=data[('proxy.process.http.transaction_totaltime.'
-                        'hit_revalidated')],
+            value=self._getValue(data, ('proxy.process.http.transaction_totaltime.'
+                        'hit_revalidated')),
             labels={'state': 'revalidated',
                     'protocol': 'http'})
         yield metric
@@ -185,25 +194,25 @@ class StatsPluginCollector(object):
             'counter')
         metric.add_sample(
             'trafficserver_miss_transaction_time_ms_total',
-            value=data['proxy.process.http.transaction_totaltime.miss_cold'],
+            value=self._getValue(data, 'proxy.process.http.transaction_totaltime.miss_cold'),
             labels={'state': 'cold',
                     'protocol': 'http'})
         metric.add_sample(
             'trafficserver_miss_transaction_time_ms_total',
-            value=data[('proxy.process.http.transaction_totaltime.'
-                        'miss_not_cacheable')],
+            value=self._getValue(data, ('proxy.process.http.transaction_totaltime.'
+                        'miss_not_cacheable')),
             labels={'state': 'not_cacheable',
                     'protocol': 'http'})
         metric.add_sample(
             'trafficserver_miss_transaction_time_ms_total',
-            value=data[('proxy.process.http.transaction_totaltime.'
-                        'miss_changed')],
+            value=self._getValue(data, ('proxy.process.http.transaction_totaltime.'
+                        'miss_changed')),
             labels={'state': 'changed',
                     'protocol': 'http'})
         metric.add_sample(
             'trafficserver_miss_transaction_time_ms_total',
-            value=data[('proxy.process.http.transaction_totaltime.'
-                        'miss_client_no_cache')],
+            value=self._getValue(data, ('proxy.process.http.transaction_totaltime.'
+                        'miss_client_no_cache')),
             labels={'state': 'no_cache',
                     'protocol': 'http'})
         yield metric
@@ -215,26 +224,26 @@ class StatsPluginCollector(object):
             'counter')
         metric.add_sample(
             'trafficserver_error_transaction_time_ms_total',
-            value=data[('proxy.process.http.transaction_totaltime.errors.'
-                        'aborts')],
+            value=self._getValue(data, ('proxy.process.http.transaction_totaltime.errors.'
+                        'aborts')),
             labels={'state': 'abort',
                     'protocol': 'http'})
         metric.add_sample(
             'trafficserver_error_transaction_time_ms_total',
-            value=data[('proxy.process.http.transaction_totaltime.errors.'
-                        'possible_aborts')],
+            value=self._getValue(data, ('proxy.process.http.transaction_totaltime.errors.'
+                        'possible_aborts')),
             labels={'state': 'possible_abort',
                     'protocol': 'http'})
         metric.add_sample(
             'trafficserver_error_transaction_time_ms_total',
-            value=data[('proxy.process.http.transaction_totaltime.errors.'
-                        'connect_failed')],
+            value=self._getValue(data, ('proxy.process.http.transaction_totaltime.errors.'
+                        'connect_failed')),
             labels={'state': 'connect_failed',
                     'protocol': 'http'})
         metric.add_sample(
             'trafficserver_error_transaction_time_ms_total',
-            value=data[('proxy.process.http.transaction_totaltime.errors.'
-                        'other')],
+            value=self._getValue(data, ('proxy.process.http.transaction_totaltime.errors.'
+                        'other')),
             labels={'state': 'other',
                     'protocol': 'http'})
         yield metric
@@ -246,8 +255,8 @@ class StatsPluginCollector(object):
             'counter')
         metric.add_sample(
             'trafficserver_other_transaction_time_ms_total',
-            value=data[('proxy.process.http.transaction_totaltime.other.'
-                        'unclassified')],
+            value=self._getValue(data, ('proxy.process.http.transaction_totaltime.other.'
+                        'unclassified')),
             labels={'state': 'unclassified',
                     'protocol': 'http'})
         yield metric
@@ -259,30 +268,30 @@ class StatsPluginCollector(object):
             'counter')
         metric.add_sample(
             'trafficserver_transaction_hits_total',
-            value=data[('proxy.process.http.transaction_counts.'
-                        'hit_fresh')],
+            value=self._getValue(data, ('proxy.process.http.transaction_counts.'
+                        'hit_fresh')),
             labels={'state': 'fresh',
                     'protocol': 'http'})
         metric.add_sample(
             'trafficserver_transaction_hits_total',
-            value=data[('proxy.process.http.transaction_counts.'
-                        'hit_revalidated')],
+            value=self._getValue(data, ('proxy.process.http.transaction_counts.'
+                        'hit_revalidated')),
             labels={'state': 'revalidated',
                     'protocol': 'http'})
         # Zero labels (misses)
         metric.add_sample(
             'trafficserver_transaction_hits_total',
-            value='0',
+            value=0,
             labels={'state': 'cold',
                     'protocol': 'http'})
         metric.add_sample(
             'trafficserver_transaction_hits_total',
-            value='0',
+            value=0,
             labels={'state': 'not_cacheable',
                     'protocol': 'http'})
         metric.add_sample(
             'trafficserver_transaction_hits_total',
-            value='0',
+            value=0,
             labels={'state': 'changed',
                     'protocol': 'http'})
         yield metric
@@ -294,31 +303,31 @@ class StatsPluginCollector(object):
             'counter')
         metric.add_sample(
             'trafficserver_transaction_misses_total',
-            value=data[('proxy.process.http.transaction_counts.'
-                        'miss_cold')],
+            value=self._getValue(data, ('proxy.process.http.transaction_counts.'
+                        'miss_cold')),
             labels={'state': 'cold',
                     'protocol': 'http'})
         metric.add_sample(
             'trafficserver_transaction_misses_total',
-            value=data[('proxy.process.http.transaction_counts.'
-                        'miss_not_cacheable')],
+            value=self._getValue(data, ('proxy.process.http.transaction_counts.'
+                        'miss_not_cacheable')),
             labels={'state': 'not_cacheable',
                     'protocol': 'http'})
         metric.add_sample(
             'trafficserver_transaction_misses_total',
-            value=data[('proxy.process.http.transaction_counts.'
-                        'miss_changed')],
+            value=self._getValue(data, ('proxy.process.http.transaction_counts.'
+                        'miss_changed')),
             labels={'state': 'changed',
                     'protocol': 'http'})
         # Zero labels (hits)
         metric.add_sample(
             'trafficserver_transaction_misses_total',
-            value='0',
+            value=0,
             labels={'state': 'fresh',
                     'protocol': 'http'})
         metric.add_sample(
             'trafficserver_transaction_misses_total',
-            value='0',
+            value=0,
             labels={'state': 'revalidated',
                     'protocol': 'http'})
         yield metric
@@ -330,26 +339,26 @@ class StatsPluginCollector(object):
             'counter')
         metric.add_sample(
             'trafficserver_transaction_errors_total',
-            value=data[('proxy.process.http.transaction_counts.errors.'
-                        'aborts')],
+            value=self._getValue(data, ('proxy.process.http.transaction_counts.errors.'
+                        'aborts')),
             labels={'state': 'abort',
                     'protocol': 'http'})
         metric.add_sample(
             'trafficserver_transaction_errors_total',
-            value=data[('proxy.process.http.transaction_counts.errors.'
-                        'possible_aborts')],
+            value=self._getValue(data, ('proxy.process.http.transaction_counts.errors.'
+                        'possible_aborts')),
             labels={'state': 'possible_abort',
                     'protocol': 'http'})
         metric.add_sample(
             'trafficserver_transaction_errors_total',
-            value=data[('proxy.process.http.transaction_counts.errors.'
-                        'connect_failed')],
+            value=self._getValue(data, ('proxy.process.http.transaction_counts.errors.'
+                        'connect_failed')),
             labels={'state': 'connect_failed',
                     'protocol': 'http'})
         metric.add_sample(
             'trafficserver_transaction_errors_total',
-            value=data[('proxy.process.http.transaction_counts.errors.'
-                        'other')],
+            value=self._getValue(data, ('proxy.process.http.transaction_counts.errors.'
+                        'other')),
             labels={'state': 'other',
                     'protocol': 'http'})
         yield metric
@@ -361,8 +370,8 @@ class StatsPluginCollector(object):
             'counter')
         metric.add_sample(
             'trafficserver_transaction_others_total',
-            value=data[('proxy.process.http.transaction_counts.other.'
-                        'unclassified')],
+            value=self._getValue(data, ('proxy.process.http.transaction_counts.other.'
+                        'unclassified')),
             labels={'state': 'unclassified',
                     'protocol': 'http'})
         yield metric
@@ -376,7 +385,7 @@ class StatsPluginCollector(object):
             key = 'proxy.process.http.{code}_responses'.format(code=code)
             metric.add_sample(
                 'trafficserver_responses_total',
-                value=data[key],
+                value=self._getValue(data, key),
                 labels={'code': code,
                         'protocol': 'http'})
         yield metric
@@ -390,7 +399,7 @@ class StatsPluginCollector(object):
             key = 'proxy.process.http.{method}_requests'.format(method=method)
             metric.add_sample(
                 'trafficserver_requests_total',
-                value=data[key],
+                value=self._getValue(data, key),
                 labels={'method': method,
                         'protocol': 'http'})
         yield metric
@@ -402,7 +411,7 @@ class StatsPluginCollector(object):
             'counter')
         metric.add_sample(
             'trafficserver_client_requests_invalid_total',
-            value=data['proxy.process.http.invalid_client_requests'],
+            value=self._getValue(data, 'proxy.process.http.invalid_client_requests'),
             labels={'protocol': 'http'})
         yield metric
 
@@ -413,7 +422,7 @@ class StatsPluginCollector(object):
             'counter')
         metric.add_sample(
             'trafficserver_client_requests_missing_host_hdr_total',
-            value=data['proxy.process.http.missing_host_hdr'],
+            value=self._getValue(data, 'proxy.process.http.missing_host_hdr'),
             labels={'protocol': 'http'})
         yield metric
 
@@ -424,17 +433,17 @@ class StatsPluginCollector(object):
             'counter')
         metric.add_sample(
             'trafficserver_request_size_bytes_total',
-            value=data['proxy.node.http.user_agent_total_request_bytes'],
+            value=self._getValue(data, 'proxy.node.http.user_agent_total_request_bytes'),
             labels={'source': 'user_agent',
                     'protocol': 'http'})
         metric.add_sample(
             'trafficserver_request_size_bytes_total',
-            value=data['proxy.node.http.origin_server_total_request_bytes'],
+            value=self._getValue(data, 'proxy.node.http.origin_server_total_request_bytes'),
             labels={'source': 'origin_server',
                     'protocol': 'http'})
         metric.add_sample(
             'trafficserver_request_size_bytes_total',
-            value=data['proxy.node.http.parent_proxy_total_request_bytes'],
+            value=self._getValue(data, 'proxy.node.http.parent_proxy_total_request_bytes'),
             labels={'source': 'parent_proxy',
                     'protocol': 'http'})
         yield metric
@@ -446,17 +455,17 @@ class StatsPluginCollector(object):
             'counter')
         metric.add_sample(
             'trafficserver_response_size_bytes_total',
-            value=data['proxy.node.http.user_agent_total_response_bytes'],
+            value=self._getValue(data, 'proxy.node.http.user_agent_total_response_bytes'),
             labels={'source': 'user_agent',
                     'protocol': 'http'})
         metric.add_sample(
             'trafficserver_response_size_bytes_total',
-            value=data['proxy.node.http.origin_server_total_response_bytes'],
+            value=self._getValue(data, 'proxy.node.http.origin_server_total_response_bytes'),
             labels={'source': 'origin_server',
                     'protocol': 'http'})
         metric.add_sample(
             'trafficserver_response_size_bytes_total',
-            value=data['proxy.node.http.parent_proxy_total_response_bytes'],
+            value=self._getValue(data, 'proxy.node.http.parent_proxy_total_response_bytes'),
             labels={'source': 'parent_proxy',
                     'protocol': 'http'})
         yield metric
@@ -482,7 +491,7 @@ class StatsPluginCollector(object):
             'counter')
         metric.add_sample(
             'trafficserver_ram_cache_hits_total',
-            value=data['proxy.process.cache.ram_cache.hits'],
+            value=self._getValue(data, 'proxy.process.cache.ram_cache.hits'),
             labels={'volume': str(volume)})
         yield metric
 
@@ -492,7 +501,7 @@ class StatsPluginCollector(object):
             'counter')
         metric.add_sample(
             'trafficserver_ram_cache_misses_total',
-            value=data['proxy.process.cache.ram_cache.misses'],
+            value=self._getValue(data, 'proxy.process.cache.ram_cache.misses'),
             labels={})
         yield metric
 
@@ -502,7 +511,7 @@ class StatsPluginCollector(object):
             'gauge')
         metric.add_sample(
             'trafficserver_ram_cache_avail_size_bytes_total',
-            value=data['proxy.process.cache.ram_cache.total_bytes'],
+            value=self._getValue(data, 'proxy.process.cache.ram_cache.total_bytes'),
             labels={})
         yield metric
 
@@ -512,7 +521,7 @@ class StatsPluginCollector(object):
             'gauge')
         metric.add_sample(
             'trafficserver_ram_cache_used_bytes_total',
-            value=data['proxy.process.cache.ram_cache.bytes_used'],
+            value=self._getValue(data, 'proxy.process.cache.ram_cache.bytes_used'),
             labels={})
         yield metric
 
@@ -523,8 +532,8 @@ class StatsPluginCollector(object):
             'gauge')
         metric.add_sample(
             'trafficserver_cache_avail_size_bytes_total',
-            value=data[('proxy.process.cache.volume_{0}.'
-                        'bytes_used').format(volume)],
+            value=self._getValue(data, ('proxy.process.cache.volume_{0}.'
+                        'bytes_used').format(volume)),
             labels={'volume': str(volume)})
         yield metric
 
@@ -534,8 +543,8 @@ class StatsPluginCollector(object):
             'gauge')
         metric.add_sample(
             'trafficserver_cache_used_bytes_total',
-            value=data[('proxy.process.cache.volume_{0}.'
-                        'bytes_total').format(volume)],
+            value=self._getValue(data, ('proxy.process.cache.volume_{0}.'
+                        'bytes_total').format(volume)),
             labels={'volume': str(volume)})
         yield metric
 
@@ -550,7 +559,7 @@ class StatsPluginCollector(object):
                     volume=volume, op=op, result=result)
                 metric.add_sample(
                     'trafficserver_cache_operations_total',
-                    value=data[k],
+                    value=self._getValue(data, k),
                     labels={'volume': str(volume),
                             'operation': op,
                             'result': result})
