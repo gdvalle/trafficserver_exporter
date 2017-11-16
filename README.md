@@ -1,5 +1,7 @@
 # trafficserver_exporter
 
+[![Linux build status](https://travis-ci.org/gdvalle/trafficserver_exporter.svg?branch=master)](https://travis-ci.org/gdvalle/trafficserver_exporter)
+
 An Apache Traffic Server metrics exporter for Prometheus.  Uses the stats_over_http plugin to translate JSON data into Prometheus format.
 
 
