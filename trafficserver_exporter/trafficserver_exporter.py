@@ -1,3 +1,6 @@
+
+"""Prometheus exporter for Apache Traffic Server's stats_over_http plugin."""
+
 import argparse
 import logging
 
@@ -24,9 +27,6 @@ ARGS.add_argument(
     '--no-procstats', dest='no_procstats', default=False, action='store_true',
     help='Disable process metric collection')
 ARGS.add_argument(
-    '--convert-to-floats', dest='convert_to_floats', default=False, action='store_true',
-    help='Convert numeric values, emitted as strings, to floats - needed for older versions of Traffic Server')
-ARGS.add_argument(
     '-v', '--verbose', action='count', dest='level',
     default=0, help='Verbose logging (repeat for more verbosity)')
 
@@ -34,6 +34,7 @@ LOG = logging.getLogger(__name__)
 
 
 def get_ts_pid(pidfile):
+    """Read a pidfile, return a PID."""
     try:
         with open(pidfile) as f:
             pid = f.readline()
@@ -61,7 +62,7 @@ def main():
     httpd_thread = start_http_server(args.port, addr=args.addr)
 
     LOG.debug('Registering StatsPluginCollector')
-    REGISTRY.register(StatsPluginCollector(args.endpoint, args.convert_to_floats))
+    REGISTRY.register(StatsPluginCollector(args.endpoint)
 
     if not args.no_procstats:
         LOG.debug('Registering ProcessCollector')
