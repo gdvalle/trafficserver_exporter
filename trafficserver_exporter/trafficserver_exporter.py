@@ -19,16 +19,21 @@ ARGS.add_argument(
 ARGS.add_argument(
     '--addr', dest='addr', default='', help='Address to bind and listen on')
 ARGS.add_argument(
-    '--port', dest='port', default=9122, help='Port to bind and listen on')
+    '--port', dest='port', default=9122, type=int,
+    help='Port to bind and listen on')
 ARGS.add_argument(
     '--pidfile', dest='pidfile', default='/var/run/trafficserver/server.lock',
     help='Path to trafficserver PID file; used with --procstats')
 ARGS.add_argument(
-    '--no-procstats', dest='no_procstats', default=False, action='store_true',
+    '--procstats', dest='procstats', action='store_true',
+    help='Enable process metric collection')
+ARGS.add_argument(
+    '--no-procstats', dest='procstats', action='store_false',
     help='Disable process metric collection')
+ARGS.set_defaults(procstats=True)
 ARGS.add_argument(
     '--max-retries', dest='max_retries', type=int, default=0,
-    help='Maximum retries for DNS lookups or connnection timeouts/failures.')
+    help='Maximum retries for DNS lookups or connnection timeouts/failures')
 ARGS.add_argument(
     '-v', '--verbose', action='count', dest='level',
     default=0, help='Verbose logging (repeat for more verbosity)')
@@ -69,7 +74,7 @@ def main():
         args.endpoint,
         max_retries=args.max_retries))
 
-    if not args.no_procstats:
+    if args.procstats:
         LOG.debug('Registering ProcessCollector')
         REGISTRY.register(ProcessCollector(
             pid=lambda: get_ts_pid(args.pidfile),
