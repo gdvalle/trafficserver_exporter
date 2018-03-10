@@ -495,16 +495,6 @@ class StatsPluginCollector(object):
                 yield metric
 
         metric = Metric(
-            'trafficserver_ram_cache_hits_total',
-            'RAM cache hit count.',
-            'counter')
-        metric.add_sample(
-            'trafficserver_ram_cache_hits_total',
-            value=float(data['proxy.process.cache.ram_cache.hits']),
-            labels={'volume': str(volume)})
-        yield metric
-
-        metric = Metric(
             'trafficserver_ram_cache_misses_total',
             'RAM cache miss count.',
             'counter')
@@ -535,6 +525,16 @@ class StatsPluginCollector(object):
         yield metric
 
     def _parse_volume_metrics(self, data, volume):
+        metric = Metric(
+            'trafficserver_ram_cache_hits_total',
+            'RAM cache hit count.',
+            'counter')
+        metric.add_sample(
+            'trafficserver_ram_cache_hits_total',
+            value=float(data['proxy.process.cache.ram_cache.hits']),
+            labels={'volume': str(volume)})
+        yield metric
+
         metric = Metric(
             'trafficserver_cache_avail_size_bytes_total',
             'Total cache available.',
