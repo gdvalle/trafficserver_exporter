@@ -28,10 +28,14 @@ LOG = logging.getLogger(__name__)
 class StatsPluginCollector(object):
     """Collector for metrics from the stats_over_http plugin."""
 
-    def __init__(self, endpoint):
+    def __init__(self, endpoint, max_retries=0):
         """Instantiate a new Collector for ATS stats."""
         self._endpoint = endpoint
         self.log = LOG
+        self.session = requests.Session()
+        http_adapter = requests.adapters.HTTPAdapter(max_retries=max_retries)
+        for prefix in ('http://', 'https://'):
+            self.session.mount(prefix, http_adapter)
 
     def get_json(self):
         """Query the ATS stats endpoint, return parsed JSON."""
