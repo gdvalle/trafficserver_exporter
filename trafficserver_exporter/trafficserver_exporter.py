@@ -1,3 +1,6 @@
+
+"""Prometheus exporter for Apache Traffic Server's stats_over_http plugin."""
+
 import argparse
 import logging
 
@@ -31,6 +34,7 @@ LOG = logging.getLogger(__name__)
 
 
 def get_ts_pid(pidfile):
+    """Read a pidfile, return a PID."""
     try:
         with open(pidfile) as f:
             pid = f.readline()
@@ -58,7 +62,7 @@ def main():
     httpd_thread = start_http_server(args.port, addr=args.addr)
 
     LOG.debug('Registering StatsPluginCollector')
-    REGISTRY.register(StatsPluginCollector(args.endpoint))
+    REGISTRY.register(StatsPluginCollector(args.endpoint)
 
     if not args.no_procstats:
         LOG.debug('Registering ProcessCollector')
