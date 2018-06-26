@@ -1,4 +1,5 @@
 import threading
+
 try:
     from http.server import HTTPServer
 except ImportError:
@@ -8,12 +9,14 @@ except ImportError:
 from prometheus_client.exposition import MetricsHandler
 
 
-def start_http_server(port, addr=''):
+def start_http_server(port, addr=""):
     """Starts a HTTP server for prometheus metrics as a daemon thread."""
+
     class PrometheusMetricsServer(threading.Thread):
         def run(self):
             httpd = HTTPServer((addr, port), MetricsHandler)
             httpd.serve_forever()
+
     t = PrometheusMetricsServer()
     t.daemon = True
     t.start()
