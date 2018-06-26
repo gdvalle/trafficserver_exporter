@@ -260,13 +260,17 @@ class StatsPluginCollector(object):
             'trafficserver_other_transaction_time_ms_total',
             'Total other/unclassified transaction time (ms).',
             'counter')
-        metric.add_sample(
-            'trafficserver_other_transaction_time_ms_total',
-            value=float(data[('proxy.process.http.transaction_totaltime.'
-                              'errors.unclassified')]),
-            labels={'state': 'unclassified',
-                    'protocol': 'http'})
-        yield metric
+        try:
+            metric.add_sample(
+                'trafficserver_other_transaction_time_ms_total',
+                value=float(data[('proxy.process.http.transaction_totaltime.'
+                                  'errors.unclassified')]),
+                labels={'state': 'unclassified',
+                        'protocol': 'http'})
+        except KeyError:
+            pass
+        else:
+            yield metric
 
         # Transaction count, hits
         metric = Metric(
