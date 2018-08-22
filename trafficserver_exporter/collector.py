@@ -189,7 +189,7 @@ class StatsPluginCollector(object):
         )
         metric.add_sample(
             "trafficserver_transactions_total",
-            value=data[("proxy.node.http." "user_agents_total_transactions_count")],
+            value=float(data[("proxy.node.http." "user_agents_total_transactions_count")]),
             labels={"source": "user_agent", "protocol": "http"},
         )
         metric.add_sample(
