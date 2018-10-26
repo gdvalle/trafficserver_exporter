@@ -183,22 +183,6 @@ class StatsPluginCollector(object):
         )
         yield metric
 
-        # Transaction count
-        metric = Metric(
-            "trafficserver_transactions_total", "Total transactions.", "counter"
-        )
-        metric.add_sample(
-            "trafficserver_transactions_total",
-            value=float(data[("proxy.node.http." "user_agents_total_transactions_count")]),
-            labels={"source": "user_agent", "protocol": "http"},
-        )
-        metric.add_sample(
-            "trafficserver_transactions_total",
-            value=float(data["proxy.node.http.origin_server_total_transactions_count"]),
-            labels={"source": "origin_server", "protocol": "http"},
-        )
-        yield metric
-
         # Transaction time spent, total
         metric = Metric(
             "trafficserver_transactions_time_ms_total",
@@ -509,17 +493,17 @@ class StatsPluginCollector(object):
         )
         metric.add_sample(
             "trafficserver_request_size_bytes_total",
-            value=float(data["proxy.node.http.user_agent_total_request_bytes"]),
+            value=float(data["proxy.process.http.user_agent_total_request_bytes"]),
             labels={"source": "user_agent", "protocol": "http"},
         )
         metric.add_sample(
             "trafficserver_request_size_bytes_total",
-            value=float(data["proxy.node.http.origin_server_total_request_bytes"]),
+            value=float(data["proxy.process.http.origin_server_total_request_bytes"]),
             labels={"source": "origin_server", "protocol": "http"},
         )
         metric.add_sample(
             "trafficserver_request_size_bytes_total",
-            value=float(data["proxy.node.http.parent_proxy_total_request_bytes"]),
+            value=float(data["proxy.process.http.parent_proxy_request_total_bytes"]),
             labels={"source": "parent_proxy", "protocol": "http"},
         )
         yield metric
@@ -532,17 +516,17 @@ class StatsPluginCollector(object):
         )
         metric.add_sample(
             "trafficserver_response_size_bytes_total",
-            value=float(data["proxy.node.http.user_agent_total_response_bytes"]),
+            value=float(data["proxy.process.http.user_agent_total_response_bytes"]),
             labels={"source": "user_agent", "protocol": "http"},
         )
         metric.add_sample(
             "trafficserver_response_size_bytes_total",
-            value=float(data["proxy.node.http.origin_server_total_response_bytes"]),
+            value=float(data["proxy.process.http.origin_server_total_response_bytes"]),
             labels={"source": "origin_server", "protocol": "http"},
         )
         metric.add_sample(
             "trafficserver_response_size_bytes_total",
-            value=float(data["proxy.node.http.parent_proxy_total_response_bytes"]),
+            value=float(data["proxy.process.http.parent_proxy_response_total_bytes"]),
             labels={"source": "parent_proxy", "protocol": "http"},
         )
         yield metric
