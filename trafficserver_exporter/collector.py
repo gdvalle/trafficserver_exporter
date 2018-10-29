@@ -1,4 +1,3 @@
-
 """Prometheus collector for Apache Traffic Server's stats_over_http plugin."""
 
 import logging
@@ -63,6 +62,21 @@ TS_RESPONSE_CODES = (
 CACHE_VOLUMES = re.compile("^proxy.process.cache.volume_([0-9]+)")
 
 LOG = logging.getLogger(__name__)
+
+
+def _get_float_value(data, keys):
+    """Fetch a value using a list of keys.  First present key wins.
+    Used for backwards compatibility with older ATS versions.
+    """
+    for key in keys:
+        try:
+            value = float(data[key])
+        except KeyError:
+            pass
+        else:
+            return value
+
+    raise KeyError("Keys not found in data: {}".format(",".join(keys)))
 
 
 class StatsPluginCollector(object):
@@ -187,17 +201,25 @@ class StatsPluginCollector(object):
         metric = Metric(
             "trafficserver_transactions_total", "Total transactions.", "counter"
         )
-        metric.add_sample(
-            "trafficserver_transactions_total",
-            value=float(data[("proxy.node.http." "user_agents_total_transactions_count")]),
-            labels={"source": "user_agent", "protocol": "http"},
-        )
-        metric.add_sample(
-            "trafficserver_transactions_total",
-            value=float(data["proxy.node.http.origin_server_total_transactions_count"]),
-            labels={"source": "origin_server", "protocol": "http"},
-        )
-        yield metric
+        try:
+            metric.add_sample(
+                "trafficserver_transactions_total",
+                value=float(
+                    data["proxy.node.http.user_agents_total_transactions_count"]
+                ),
+                labels={"source": "user_agent", "protocol": "http"},
+            )
+            metric.add_sample(
+                "trafficserver_transactions_total",
+                value=float(
+                    data["proxy.node.http.origin_server_total_transactions_count"]
+                ),
+                labels={"source": "origin_server", "protocol": "http"},
+            )
+            yield metric
+        except KeyError:
+            # TS v8.0+ removed these metrics.
+            pass
 
         # Transaction time spent, total
         metric = Metric(
@@ -501,51 +523,86 @@ class StatsPluginCollector(object):
         )
         yield metric
 
-        # Request size
-        metric = Metric(
-            "trafficserver_request_size_bytes_total",
-            "Request size in bytes.",
-            "counter",
-        )
-        metric.add_sample(
-            "trafficserver_request_size_bytes_total",
-            value=float(data["proxy.node.http.user_agent_total_request_bytes"]),
-            labels={"source": "user_agent", "protocol": "http"},
-        )
-        metric.add_sample(
-            "trafficserver_request_size_bytes_total",
-            value=float(data["proxy.node.http.origin_server_total_request_bytes"]),
-            labels={"source": "origin_server", "protocol": "http"},
-        )
-        metric.add_sample(
-            "trafficserver_request_size_bytes_total",
-            value=float(data["proxy.node.http.parent_proxy_total_request_bytes"]),
-            labels={"source": "parent_proxy", "protocol": "http"},
-        )
-        yield metric
+        for rt in ("request", "response"):
+            metric_name = "trafficserver_{}_size_bytes_total".format(rt)
+            metric = Metric(
+                metric_name, "{} size in bytes.".format(rt.capitalize()), "counter"
+            )
 
-        # Response size
-        metric = Metric(
-            "trafficserver_response_size_bytes_total",
-            "Response size in bytes.",
-            "counter",
-        )
-        metric.add_sample(
-            "trafficserver_response_size_bytes_total",
-            value=float(data["proxy.node.http.user_agent_total_response_bytes"]),
-            labels={"source": "user_agent", "protocol": "http"},
-        )
-        metric.add_sample(
-            "trafficserver_response_size_bytes_total",
-            value=float(data["proxy.node.http.origin_server_total_response_bytes"]),
-            labels={"source": "origin_server", "protocol": "http"},
-        )
-        metric.add_sample(
-            "trafficserver_response_size_bytes_total",
-            value=float(data["proxy.node.http.parent_proxy_total_response_bytes"]),
-            labels={"source": "parent_proxy", "protocol": "http"},
-        )
-        yield metric
+            try:
+                user_bytes = _get_float_value(
+                    data,
+                    [
+                        "proxy.process.http.user_agent_total_{}_bytes".format(rt),
+                        "proxy.node.http.user_agent_total_{}_bytes".format(rt),
+                    ],
+                )
+            except KeyError:
+                # TS v8 with missing total.
+                header_total = float(
+                    data[
+                        "proxy.process.http.user_agent_{}_header_total_size".format(rt)
+                    ]
+                )
+                doc_total = float(
+                    data[
+                        "proxy.process.http.user_agent_{}_document_total_size".format(
+                            rt
+                        )
+                    ]
+                )
+                user_bytes = header_total + doc_total
+
+            metric.add_sample(
+                metric_name,
+                value=user_bytes,
+                labels={"source": "user_agent", "protocol": "http"},
+            )
+
+            try:
+                origin_bytes = _get_float_value(
+                    data,
+                    [
+                        "proxy.process.http.origin_server_total_{}_bytes".format(rt),
+                        "proxy.node.http.origin_server_total_{}_bytes".format(rt),
+                    ],
+                )
+            except KeyError:
+                # TS v8 with missing total.
+                header_total = float(
+                    data[
+                        "proxy.process.http.origin_server_{}_header_total_size".format(
+                            rt
+                        )
+                    ]
+                )
+                doc_total = float(
+                    data[
+                        "proxy.process.http.origin_server_{}_document_total_size".format(
+                            rt
+                        )
+                    ]
+                )
+                origin_bytes = header_total + doc_total
+
+            metric.add_sample(
+                metric_name,
+                value=origin_bytes,
+                labels={"source": "origin_server", "protocol": "http"},
+            )
+
+            metric.add_sample(
+                metric_name,
+                value=_get_float_value(
+                    data,
+                    [
+                        "proxy.process.http.parent_proxy_{}_total_bytes".format(rt),
+                        "proxy.node.http.parent_proxy_total_{}_bytes".format(rt),
+                    ],
+                ),
+                labels={"source": "parent_proxy", "protocol": "http"},
+            )
+            yield metric
 
         #
         # Cache
