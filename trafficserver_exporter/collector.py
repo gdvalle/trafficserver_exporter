@@ -15,7 +15,6 @@ HTTP_VERBS_LOWER = tuple([v.lower() for v in HTTP_VERBS])
 TS_RESPONSE_CODES = (
     "100",
     "101",
-    "1xx",
     "200",
     "201",
     "202",
@@ -23,7 +22,6 @@ TS_RESPONSE_CODES = (
     "204",
     "205",
     "206",
-    "2xx",
     "300",
     "301",
     "302",
@@ -31,7 +29,6 @@ TS_RESPONSE_CODES = (
     "304",
     "305",
     "307",
-    "3xx",
     "400",
     "401",
     "402",
@@ -49,15 +46,15 @@ TS_RESPONSE_CODES = (
     "414",
     "415",
     "416",
-    "4xx",
     "500",
     "501",
     "502",
     "503",
     "504",
     "505",
-    "5xx",
 )
+
+TS_RESPONSE_CODE_CLASSES = ("1xx", "2xx", "3xx", "4xx", "5xx")
 
 CACHE_VOLUMES = re.compile("^proxy.process.cache.volume_([0-9]+)")
 
@@ -481,6 +478,25 @@ class StatsPluginCollector(object):
             key = "proxy.process.http.{code}_responses".format(code=code)
             metric.add_sample(
                 "trafficserver_responses_total",
+                value=float(data[key]),
+                labels={"code": code, "protocol": "http"},
+            )
+        yield metric
+
+        # HTTP Responses, by class
+        # This seems a little redundant in that it could be accomplished with
+        # a simple recording rule, but the HTTP response codes tracked don't
+        # appear to be the full array of codes, so they may be swept into this
+        # bucket.
+        metric = Metric(
+            "trafficserver_response_classes_total",
+            "Response count by class, i.e. 2xx, 3xx.",
+            "counter",
+        )
+        for code in TS_RESPONSE_CODE_CLASSES:
+            key = "proxy.process.http.{code}_responses".format(code=code)
+            metric.add_sample(
+                "trafficserver_response_classes_total",
                 value=float(data[key]),
                 labels={"code": code, "protocol": "http"},
             )
