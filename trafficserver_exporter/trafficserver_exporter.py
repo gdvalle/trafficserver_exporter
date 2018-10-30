@@ -1,4 +1,3 @@
-
 """Prometheus exporter for Apache Traffic Server's stats_over_http plugin."""
 
 import argparse
