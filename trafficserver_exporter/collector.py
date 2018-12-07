@@ -688,7 +688,7 @@ class StatsPluginCollector(object):
         metric.add_sample(
             "trafficserver_cache_avail_size_bytes_total",
             value=float(
-                data["proxy.process.cache.volume_{0}.bytes_used".format(volume)]
+                data["proxy.process.cache.volume_{0}.bytes_total".format(volume)]
             ),
             labels={"volume": str(volume)},
         )
@@ -702,7 +702,7 @@ class StatsPluginCollector(object):
         metric.add_sample(
             "trafficserver_cache_used_bytes_total",
             value=float(
-                data["proxy.process.cache.volume_{0}.bytes_total".format(volume)]
+                data["proxy.process.cache.volume_{0}.bytes_used".format(volume)]
             ),
             labels={"volume": str(volume)},
         )
