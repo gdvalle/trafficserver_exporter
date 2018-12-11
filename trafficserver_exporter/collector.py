@@ -172,6 +172,28 @@ class StatsPluginCollector(object):
         )
         yield metric
 
+        # Incoming responses
+        metric = Metric(
+            "trafficserver_responses_incoming_total", "Incoming responses.", "counter"
+        )
+        metric.add_sample(
+            "trafficserver_responses_incoming_total",
+            value=float(data["proxy.process.http.incoming_responses"]),
+            labels={"protocol": "http"},
+        )
+        yield metric
+
+        # Outgoing requests
+        metric = Metric(
+            "trafficserver_requests_outgoing_total", "Outgoing requests.", "counter"
+        )
+        metric.add_sample(
+            "trafficserver_requests_outgoing_total",
+            value=float(data["proxy.process.http.outgoing_requests"]),
+            labels={"protocol": "http"},
+        )
+        yield metric
+
         # Client aborts
         metric = Metric(
             "trafficserver_error_client_aborts_total", "Client aborts.", "counter"
@@ -703,6 +725,34 @@ class StatsPluginCollector(object):
             "trafficserver_cache_used_bytes_total",
             value=float(
                 data["proxy.process.cache.volume_{0}.bytes_used".format(volume)]
+            ),
+            labels={"volume": str(volume)},
+        )
+        yield metric
+
+        metric = Metric(
+            "trafficserver_cache_direntries",
+            "Total cache direntries.",
+            "gauge",
+        )
+        metric.add_sample(
+            "trafficserver_cache_direntries",
+            value=float(
+                data["proxy.process.cache.volume_{0}.direntries.total".format(volume)]
+            ),
+            labels={"volume": str(volume)},
+        )
+        yield metric
+
+        metric = Metric(
+            "trafficserver_cache_used_direntries",
+            "Cache direntries used.",
+            "gauge",
+        )
+        metric.add_sample(
+            "trafficserver_cache_used_direntries",
+            value=float(
+                data["proxy.process.cache.volume_{0}.direntries.used".format(volume)]
             ),
             labels={"volume": str(volume)},
         )
