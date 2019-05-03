@@ -79,9 +79,10 @@ def _get_float_value(data, keys):
 class StatsPluginCollector(object):
     """Collector for metrics from the stats_over_http plugin."""
 
-    def __init__(self, endpoint, max_retries=0):
+    def __init__(self, endpoint, max_retries=0, ssl_verify=True):
         """Instantiate a new Collector for ATS stats."""
         self._endpoint = endpoint
+        self._ssl_verify = ssl_verify
         self.log = LOG
         self.session = requests.Session()
         http_adapter = requests.adapters.HTTPAdapter(max_retries=max_retries)
@@ -90,9 +91,8 @@ class StatsPluginCollector(object):
 
     def get_json(self):
         """Query the ATS stats endpoint, return parsed JSON."""
-        return json.loads(requests.get(self._endpoint).content.decode("UTF-8"))[
-            "global"
-        ]
+        r = requests.get(self._endpoint, verify=self._ssl_verify)
+        return r.json()["global"]
 
     def collect(self):
         """Generator used to gather and return all metrics."""
