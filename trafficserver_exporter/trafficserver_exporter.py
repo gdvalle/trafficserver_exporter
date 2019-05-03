@@ -45,6 +45,13 @@ ARGS.add_argument(
 )
 ARGS.set_defaults(procstats=True)
 ARGS.add_argument(
+    "--no-ssl-verification",
+    dest="sslverification",
+    action="store_false",
+    help="Disable SSL certificate verification on metric collection",
+)
+ARGS.set_defaults(sslverification=True)
+ARGS.add_argument(
     "--max-retries",
     dest="max_retries",
     type=int,
@@ -92,7 +99,8 @@ def main():
     httpd_thread = start_http_server(args.port, addr=args.addr)
 
     LOG.debug("Registering StatsPluginCollector")
-    REGISTRY.register(StatsPluginCollector(args.endpoint, max_retries=args.max_retries))
+    REGISTRY.register(StatsPluginCollector(args.endpoint, max_retries=args.max_retries,
+                                           ssl_verify=args.sslverification))
 
     if args.procstats:
         LOG.debug("Registering ProcessCollector")
