@@ -2,12 +2,16 @@
 
 import argparse
 import logging
+import sys
+from os import path
 
 from prometheus_client import REGISTRY, ProcessCollector
 
 from .collector import StatsPluginCollector
 from .http import start_http_server
 
+
+PKG_METRICS_FILE = path.join(path.dirname(sys.modules['trafficserver_exporter'].__file__), 'metrics.yaml')
 
 ARGS = argparse.ArgumentParser(
     formatter_class=argparse.ArgumentDefaultsHelpFormatter,
@@ -18,6 +22,12 @@ ARGS.add_argument(
     dest="endpoint",
     default="http://127.0.0.1/_stats",
     help="Traffic Server's stats_over_http plugin URL",
+)
+ARGS.add_argument(
+    "--metrics-file",
+    dest="metrics_file",
+    default=PKG_METRICS_FILE,
+    help="YAML file containing the metrics definition",
 )
 ARGS.add_argument(
     "--addr", dest="addr", default="", help="Address to bind and listen on"
@@ -99,7 +109,7 @@ def main():
     httpd_thread = start_http_server(args.port, addr=args.addr)
 
     LOG.debug("Registering StatsPluginCollector")
-    REGISTRY.register(StatsPluginCollector(args.endpoint, max_retries=args.max_retries,
+    REGISTRY.register(StatsPluginCollector(args.endpoint, args.metrics_file, max_retries=args.max_retries,
                                            ssl_verify=args.sslverification))
 
     if args.procstats:

@@ -24,8 +24,12 @@ setup(
             'trafficserver_exporter=trafficserver_exporter.__main__:main'
         ],
     },
+    package_data={
+        'trafficserver_exporter': ['metrics.yaml'],
+    },
     install_requires=[
         'prometheus_client>=0.0.11',
+        'pyyaml>=3.12',
         'requests>=2.0.0'
     ],
     classifiers=[
