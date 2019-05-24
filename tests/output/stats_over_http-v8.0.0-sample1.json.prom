@@ -1,0 +1,160 @@
+# HELP trafficserver_client_requests_invalid_total_total Invalid client requests.
+# TYPE trafficserver_client_requests_invalid_total_total counter
+trafficserver_client_requests_invalid_total{protocol="http"} 1.0
+# HELP trafficserver_ram_cache_misses_total_total RAM cache miss count.
+# TYPE trafficserver_ram_cache_misses_total_total counter
+trafficserver_ram_cache_misses_total 1.0
+# HELP trafficserver_transactions_total_total Total transactions.
+# TYPE trafficserver_transactions_total_total counter
+trafficserver_transactions_total{protocol="http",source="origin_server"} 1.0
+trafficserver_transactions_total{protocol="http",source="user_agent"} 1.0
+# HELP trafficserver_client_requests_missing_host_hdr_total_total Client requests missing host header.
+# TYPE trafficserver_client_requests_missing_host_hdr_total_total counter
+trafficserver_client_requests_missing_host_hdr_total{protocol="http"} 1.0
+# HELP trafficserver_requests_incoming Incoming requests.
+# TYPE trafficserver_requests_incoming gauge
+trafficserver_requests_incoming{protocol="http"} 1.0
+# HELP trafficserver_transaction_errors_total_total Transaction error counts.
+# TYPE trafficserver_transaction_errors_total_total counter
+trafficserver_transaction_errors_total{protocol="http",state="abort"} 1.0
+trafficserver_transaction_errors_total{protocol="http",state="possible_abort"} 1.0
+trafficserver_transaction_errors_total{protocol="http",state="connect_failed"} 1.0
+trafficserver_transaction_errors_total{protocol="http",state="other"} 1.0
+# HELP trafficserver_transaction_others_total_total Transaction other/unclassified counts.
+# TYPE trafficserver_transaction_others_total_total counter
+trafficserver_transaction_others_total{protocol="http",state="unclassified"} 1.0
+# HELP trafficserver_miss_transaction_time_ms_total_total Total cache miss transaction time (ms).
+# TYPE trafficserver_miss_transaction_time_ms_total_total counter
+trafficserver_miss_transaction_time_ms_total{protocol="http",state="cold"} 1.0
+trafficserver_miss_transaction_time_ms_total{protocol="http",state="not_cacheable"} 1.0
+trafficserver_miss_transaction_time_ms_total{protocol="http",state="changed"} 1.0
+trafficserver_miss_transaction_time_ms_total{protocol="http",state="no_cache"} 1.0
+# HELP trafficserver_hit_transaction_time_ms_total_total Total cache hit transaction time (ms).
+# TYPE trafficserver_hit_transaction_time_ms_total_total counter
+trafficserver_hit_transaction_time_ms_total{protocol="http",state="fresh"} 1.0
+trafficserver_hit_transaction_time_ms_total{protocol="http",state="revalidated"} 1.0
+# HELP trafficserver_ram_cache_avail_size_bytes_total RAM cache available in bytes.
+# TYPE trafficserver_ram_cache_avail_size_bytes_total gauge
+trafficserver_ram_cache_avail_size_bytes_total 1.0
+# HELP trafficserver_responses_total_total Response count.
+# TYPE trafficserver_responses_total_total counter
+trafficserver_responses_total{code="100",protocol="http"} 1.0
+trafficserver_responses_total{code="101",protocol="http"} 1.0
+trafficserver_responses_total{code="200",protocol="http"} 1.0
+trafficserver_responses_total{code="201",protocol="http"} 1.0
+trafficserver_responses_total{code="202",protocol="http"} 1.0
+trafficserver_responses_total{code="203",protocol="http"} 1.0
+trafficserver_responses_total{code="204",protocol="http"} 1.0
+trafficserver_responses_total{code="205",protocol="http"} 1.0
+trafficserver_responses_total{code="206",protocol="http"} 1.0
+trafficserver_responses_total{code="300",protocol="http"} 1.0
+trafficserver_responses_total{code="301",protocol="http"} 1.0
+trafficserver_responses_total{code="302",protocol="http"} 1.0
+trafficserver_responses_total{code="303",protocol="http"} 1.0
+trafficserver_responses_total{code="304",protocol="http"} 1.0
+trafficserver_responses_total{code="305",protocol="http"} 1.0
+trafficserver_responses_total{code="307",protocol="http"} 1.0
+trafficserver_responses_total{code="400",protocol="http"} 1.0
+trafficserver_responses_total{code="401",protocol="http"} 1.0
+trafficserver_responses_total{code="402",protocol="http"} 1.0
+trafficserver_responses_total{code="403",protocol="http"} 1.0
+trafficserver_responses_total{code="404",protocol="http"} 1.0
+trafficserver_responses_total{code="405",protocol="http"} 1.0
+trafficserver_responses_total{code="406",protocol="http"} 1.0
+trafficserver_responses_total{code="407",protocol="http"} 1.0
+trafficserver_responses_total{code="408",protocol="http"} 1.0
+trafficserver_responses_total{code="409",protocol="http"} 1.0
+trafficserver_responses_total{code="410",protocol="http"} 1.0
+trafficserver_responses_total{code="411",protocol="http"} 1.0
+trafficserver_responses_total{code="412",protocol="http"} 1.0
+trafficserver_responses_total{code="413",protocol="http"} 1.0
+trafficserver_responses_total{code="414",protocol="http"} 1.0
+trafficserver_responses_total{code="415",protocol="http"} 1.0
+trafficserver_responses_total{code="416",protocol="http"} 1.0
+trafficserver_responses_total{code="500",protocol="http"} 1.0
+trafficserver_responses_total{code="501",protocol="http"} 1.0
+trafficserver_responses_total{code="502",protocol="http"} 1.0
+trafficserver_responses_total{code="503",protocol="http"} 1.0
+trafficserver_responses_total{code="504",protocol="http"} 1.0
+trafficserver_responses_total{code="505",protocol="http"} 1.0
+# HELP trafficserver_response_classes_total_total Response count by class, i.e. 2xx, 3xx.
+# TYPE trafficserver_response_classes_total_total counter
+trafficserver_response_classes_total{code="1xx",protocol="http"} 1.0
+trafficserver_response_classes_total{code="2xx",protocol="http"} 1.0
+trafficserver_response_classes_total{code="3xx",protocol="http"} 1.0
+trafficserver_response_classes_total{code="4xx",protocol="http"} 1.0
+trafficserver_response_classes_total{code="5xx",protocol="http"} 1.0
+# HELP trafficserver_responses_incoming_total_total Incoming responses.
+# TYPE trafficserver_responses_incoming_total_total counter
+trafficserver_responses_incoming_total{protocol="http"} 1.0
+# HELP trafficserver_transaction_misses_total_total Transaction miss counts.
+# TYPE trafficserver_transaction_misses_total_total counter
+trafficserver_transaction_misses_total{protocol="http",state="cold"} 1.0
+trafficserver_transaction_misses_total{protocol="http",state="not_cacheable"} 1.0
+trafficserver_transaction_misses_total{protocol="http",state="changed"} 1.0
+trafficserver_transaction_misses_total{protocol="http",state="fresh"} 0.0
+trafficserver_transaction_misses_total{protocol="http",state="revalidated"} 0.0
+# HELP trafficserver_error_transaction_time_ms_total_total Total cache error transaction time (ms).
+# TYPE trafficserver_error_transaction_time_ms_total_total counter
+trafficserver_error_transaction_time_ms_total{protocol="http",state="abort"} 1.0
+trafficserver_error_transaction_time_ms_total{protocol="http",state="possible_abort"} 1.0
+trafficserver_error_transaction_time_ms_total{protocol="http",state="connect_failed"} 1.0
+trafficserver_error_transaction_time_ms_total{protocol="http",state="other"} 1.0
+# HELP trafficserver_requests_outgoing_total_total Outgoing requests.
+# TYPE trafficserver_requests_outgoing_total_total counter
+trafficserver_requests_outgoing_total{protocol="http"} 1.0
+# HELP trafficserver_requests_total_total Request count.
+# TYPE trafficserver_requests_total_total counter
+trafficserver_requests_total{method="connect",protocol="http"} 1.0
+trafficserver_requests_total{method="delete",protocol="http"} 1.0
+trafficserver_requests_total{method="get",protocol="http"} 1.0
+trafficserver_requests_total{method="head",protocol="http"} 1.0
+trafficserver_requests_total{method="post",protocol="http"} 1.0
+trafficserver_requests_total{method="purge",protocol="http"} 1.0
+trafficserver_requests_total{method="push",protocol="http"} 1.0
+trafficserver_requests_total{method="put",protocol="http"} 1.0
+# HELP trafficserver_transactions_time_ms_total_total Total transaction time (ms).
+# TYPE trafficserver_transactions_time_ms_total_total counter
+trafficserver_transactions_time_ms_total 1.0
+# HELP trafficserver_restart_count_total Count of traffic_server restarts.
+# TYPE trafficserver_restart_count_total counter
+trafficserver_restart_count 1.0
+# HELP trafficserver_connections_total_total Connection count.
+# TYPE trafficserver_connections_total_total counter
+trafficserver_connections_total{protocol="http",source="client"} 1.0
+trafficserver_connections_total{protocol="http",source="server"} 1.0
+trafficserver_connections_total{protocol="http",source="parent_proxy"} 1.0
+# HELP trafficserver_error_client_aborts_total_total Client aborts.
+# TYPE trafficserver_error_client_aborts_total_total counter
+trafficserver_error_client_aborts_total{protocol="http"} 1.0
+# HELP trafficserver_ram_cache_used_bytes_total RAM cache used in bytes.
+# TYPE trafficserver_ram_cache_used_bytes_total gauge
+trafficserver_ram_cache_used_bytes_total 1.0
+# HELP trafficserver_other_transaction_time_ms_total_total Total other/unclassified transaction time (ms).
+# TYPE trafficserver_other_transaction_time_ms_total_total counter
+trafficserver_other_transaction_time_ms_total{protocol="http",state="connect_failed"} 1.0
+trafficserver_other_transaction_time_ms_total{protocol="http",state="other"} 1.0
+trafficserver_other_transaction_time_ms_total{protocol="http",state="possible_abort"} 1.0
+# HELP trafficserver_connect_failures_total_total Connect failures.
+# TYPE trafficserver_connect_failures_total_total counter
+trafficserver_connect_failures_total{protocol="http"} 1.0
+# HELP trafficserver_transaction_hits_total_total Transaction hit counts.
+# TYPE trafficserver_transaction_hits_total_total counter
+trafficserver_transaction_hits_total{protocol="http",state="fresh"} 1.0
+trafficserver_transaction_hits_total{protocol="http",state="revalidated"} 1.0
+trafficserver_transaction_hits_total{protocol="http",state="cold"} 0.0
+trafficserver_transaction_hits_total{protocol="http",state="not_cacheable"} 0.0
+trafficserver_transaction_hits_total{protocol="http",state="changed"} 0.0
+# HELP trafficserver_request_size_bytes_total_total Request size in bytes.
+# TYPE trafficserver_request_size_bytes_total_total counter
+trafficserver_request_size_bytes_total{protocol="http",source="user_agent"} 1.0
+trafficserver_request_size_bytes_total{protocol="http",source="origin_server"} 1.0
+trafficserver_request_size_bytes_total{protocol="http",source="parent_proxy"} 1.0
+# HELP trafficserver_response_size_bytes_total_total Response size in bytes.
+# TYPE trafficserver_response_size_bytes_total_total counter
+trafficserver_response_size_bytes_total{protocol="http",source="user_agent"} 1.0
+trafficserver_response_size_bytes_total{protocol="http",source="origin_server"} 1.0
+trafficserver_response_size_bytes_total{protocol="http",source="parent_proxy"} 1.0
+# HELP trafficserver_scrape_duration_seconds Time the Traffic Server scrape took, in seconds.
+# TYPE trafficserver_scrape_duration_seconds gauge
+trafficserver_scrape_duration_seconds 0.005834102630615234

@@ -46,7 +46,7 @@ class StatsPluginCollector(object):
 
     def get_json(self):
         """Query the ATS stats endpoint, return parsed JSON."""
-        r = requests.get(self._endpoint, verify=self._ssl_verify)
+        r = self.session.get(self._endpoint, verify=self._ssl_verify)
         return r.json()["global"]
 
     def collect(self):

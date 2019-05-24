@@ -9,9 +9,10 @@ DATA_DIR = os.path.abspath(
 )
 
 STATS_JSON_FILES = []
-for fname in glob.glob("{}{}{}".format(DATA_DIR, os.sep, "*.json")):
-    with open(fname) as f:
-        STATS_JSON_FILES.append(json.loads(f.read()))
+for path in glob.glob("{}{}{}".format(DATA_DIR, os.sep, "*.json")):
+    with open(path) as f:
+        fname = path.split("/")[-1]
+        STATS_JSON_FILES.append((fname, json.loads(f.read())))
 
 
 @pytest.fixture(scope="session", params=STATS_JSON_FILES)
