@@ -11,7 +11,7 @@ from setuptools import setup
 
 setup(
     name='trafficserver_exporter',
-    version='0.3.0',
+    version='0.3.1',
     author='Greg Dallavalle',
     description='Traffic Server metrics exporter for Prometheus',
     long_description=__doc__,
