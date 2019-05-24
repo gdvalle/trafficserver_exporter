@@ -32,6 +32,10 @@ setup(
         'pyyaml>=3.12',
         'requests>=2.0.0'
     ],
+    tests_require=[
+        "pytest",
+        "mock"
+    ],
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Programming Language :: Python :: 2',

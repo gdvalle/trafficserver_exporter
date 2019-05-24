@@ -19,7 +19,7 @@ def test_metric_output(stats_json):
         mock_response = Mock()
         mock_response.json.return_value = stats
         # If I generate metric output with that collector
-        output = prometheus_client.generate_latest(registry)
+        output = prometheus_client.generate_latest(registry).decode("utf-8")
 
     # I expect a proper HTTP request with the session
     mock_session.get.assert_called_once_with("http://ats", verify=True)
