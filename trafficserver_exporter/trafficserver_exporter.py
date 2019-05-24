@@ -10,8 +10,9 @@ from prometheus_client import REGISTRY, ProcessCollector
 from .collector import StatsPluginCollector
 from .http import start_http_server
 
-
-PKG_METRICS_FILE = path.join(path.dirname(sys.modules['trafficserver_exporter'].__file__), 'metrics.yaml')
+PKG_METRICS_FILE = path.join(
+    path.dirname(sys.modules["trafficserver_exporter"].__file__), "metrics.yaml"
+)
 
 ARGS = argparse.ArgumentParser(
     formatter_class=argparse.ArgumentDefaultsHelpFormatter,
@@ -109,8 +110,14 @@ def main():
     httpd_thread = start_http_server(args.port, addr=args.addr)
 
     LOG.debug("Registering StatsPluginCollector")
-    REGISTRY.register(StatsPluginCollector(args.endpoint, args.metrics_file, max_retries=args.max_retries,
-                                           ssl_verify=args.sslverification))
+    REGISTRY.register(
+        StatsPluginCollector(
+            args.endpoint,
+            args.metrics_file,
+            max_retries=args.max_retries,
+            ssl_verify=args.sslverification,
+        )
+    )
 
     if args.procstats:
         LOG.debug("Registering ProcessCollector")

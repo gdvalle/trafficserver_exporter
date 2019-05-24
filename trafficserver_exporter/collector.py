@@ -8,7 +8,6 @@ import requests
 import yaml
 from prometheus_client import Metric
 
-
 CACHE_VOLUMES = re.compile("^proxy.process.cache.volume_([0-9]+)")
 
 LOG = logging.getLogger(__name__)
@@ -41,7 +40,7 @@ class StatsPluginCollector(object):
         http_adapter = requests.adapters.HTTPAdapter(max_retries=max_retries)
         for prefix in ("http://", "https://"):
             self.session.mount(prefix, http_adapter)
-        with open(metrics_config_file, 'rb') as metrics_file:
+        with open(metrics_config_file, "rb") as metrics_file:
             self._metrics = yaml.safe_load(metrics_file.read())
 
     def get_json(self):
@@ -81,22 +80,32 @@ class StatsPluginCollector(object):
         """Generator for trafficserver metrics."""
 
         for metric_name, metric_cfg in self._metrics.items():
-            metric = Metric(metric_name, metric_cfg['documentation'], metric_cfg['type'])
-            for metric_value in metric_cfg['values']:
-                if isinstance(metric_value['value'], float):
-                    value = metric_value['value']
+            metric = Metric(
+                metric_name, metric_cfg["documentation"], metric_cfg["type"]
+            )
+            for metric_value in metric_cfg["values"]:
+                if isinstance(metric_value["value"], float):
+                    value = metric_value["value"]
                 else:
                     try:
-                        value = float(data[metric_value['value']])
+                        value = float(data[metric_value["value"]])
                     except ValueError:
-                        self.log.warning("Unable to convert metric %s value %s to float",
-                                         metric_name, metric_value['value'])
+                        self.log.warning(
+                            "Unable to convert metric %s value %s to float",
+                            metric_name,
+                            metric_value["value"],
+                        )
                     except KeyError:
-                        self.log.debug("Metric %s value %s not found",
-                                       metric_name, metric_value['value'])
+                        self.log.debug(
+                            "Metric %s value %s not found",
+                            metric_name,
+                            metric_value["value"],
+                        )
                         continue
 
-                metric.add_sample(metric_name, value=value, labels=metric_value['labels'])
+                metric.add_sample(
+                    metric_name, value=value, labels=metric_value["labels"]
+                )
             yield metric
 
         for rt in ("request", "response"):
@@ -235,9 +244,7 @@ class StatsPluginCollector(object):
         yield metric
 
         metric = Metric(
-            "trafficserver_cache_direntries",
-            "Total cache direntries.",
-            "gauge",
+            "trafficserver_cache_direntries", "Total cache direntries.", "gauge"
         )
         metric.add_sample(
             "trafficserver_cache_direntries",
@@ -249,9 +256,7 @@ class StatsPluginCollector(object):
         yield metric
 
         metric = Metric(
-            "trafficserver_cache_used_direntries",
-            "Cache direntries used.",
-            "gauge",
+            "trafficserver_cache_used_direntries", "Cache direntries used.", "gauge"
         )
         metric.add_sample(
             "trafficserver_cache_used_direntries",

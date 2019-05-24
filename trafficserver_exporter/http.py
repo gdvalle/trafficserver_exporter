@@ -1,12 +1,13 @@
 import threading
 
+from prometheus_client.exposition import MetricsHandler
+
 try:
     from http.server import HTTPServer
 except ImportError:
     # Py2
     from BaseHTTPServer import HTTPServer
 
-from prometheus_client.exposition import MetricsHandler
 
 
 def start_http_server(port, addr=""):
