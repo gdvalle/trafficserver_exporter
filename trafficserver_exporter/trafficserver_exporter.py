@@ -121,11 +121,9 @@ def main():
 
     if args.procstats:
         LOG.debug("Registering ProcessCollector")
-        REGISTRY.register(
-            ProcessCollector(
-                pid=lambda: get_ts_pid(args.pidfile), namespace="trafficserver"
+        ProcessCollector(
+            pid=lambda: get_ts_pid(args.pidfile), namespace="trafficserver"
             )
-        )
 
     LOG.info("Listening on :{port}".format(port=args.port))
 
