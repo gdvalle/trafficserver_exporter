@@ -9,7 +9,6 @@ except ImportError:
     from BaseHTTPServer import HTTPServer
 
 
-
 def start_http_server(port, addr=""):
     """Starts a HTTP server for prometheus metrics as a daemon thread."""
 

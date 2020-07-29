@@ -123,7 +123,7 @@ def main():
         LOG.debug("Registering ProcessCollector")
         ProcessCollector(
             pid=lambda: get_ts_pid(args.pidfile), namespace="trafficserver"
-            )
+        )
 
     LOG.info("Listening on :{port}".format(port=args.port))
 
